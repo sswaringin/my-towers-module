@@ -61,12 +61,30 @@ const peg = () => {
       disc: discs.pop()
     }
   }
+
+  const checkDiscOrder = (winningCondition) => {
+    const results = discs.map((disc, idx) => {
+      let result;
+      if (disc.value === winningCondition?.[idx].value) {
+        result = true;
+      } else {
+        result = false;
+      }
+      return result;
+    });
+    if (!results.includes(false)) {
+      return true;
+    }
+
+    return false;
+  }
   
   return {
     discs,
     addDisc,
     getDiscs,
-    removeDisc
+    removeDisc,
+    checkDiscOrder
   };
 };
 
@@ -75,48 +93,32 @@ const board = (pegCount, discCount) => {
   const winningCondition = [];
   const pegs = [];
 
-
   const getWinningState = () => {
     return winningState;
   };
 
-  const checkWinningState = () => {
-    console.log('checking winning state')
-    let hasCorrectOrder = false; // Assume false unless proven otherwise.
-
-    const isPeg1Empty = pegs[0].discs.length === 0;
-
+  const getPotentialPeg = () => {
     // Get a sub-array of pegs excluding peg1.
     const otherPegs = pegs.slice(1);
 
-    const checkDiscOrder = (discs) => {
-      const results = discs.map((disc, idx) => {
-        let result;
-        if (disc.value === winningCondition?.[idx].value) {
-          result = true;
-        } else {
-          result = false;
-        }
-        return result;
-      });
-
-      if (!results.includes(false)) {
-        return true;
-      }
-
-      return false;
-    }
-
     // Find if a peg has all of the discs.
     const filteredPegs = otherPegs.filter(peg => peg.discs.length === discCount);
-    const potentialPeg = filteredPegs?.[0]?.discs || [];
+    
+    return filteredPegs?.[0];
+  }
+
+  const checkWinningState = () => {
+    let hasCorrectOrder = false; // Assume false unless proven otherwise.
+    const isPeg1Empty = pegs[0].discs.length === 0;
+    const potentialPeg = getPotentialPeg();
     
     // Check if the peg has the correct order or discs
-    if (potentialPeg.length > 0) {
-      hasCorrectOrder = checkDiscOrder(potentialPeg);
+    if (potentialPeg) {
+      console.log('we have a potential!')
+      hasCorrectOrder = potentialPeg.checkDiscOrder(winningCondition);
     }
     
-    if (filteredPegs.length > 0 && isPeg1Empty && hasCorrectOrder) {
+    if (potentialPeg && isPeg1Empty && hasCorrectOrder) {
       console.log('YOU HAVE WON!');
       return;
     }
