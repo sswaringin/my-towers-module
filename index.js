@@ -133,10 +133,55 @@ const board = (pegCount, discCount) => {
     }
   };
 
+  const checkMove = (sourcePegIdx, destPegIdx) => {
+    const sourcePeg = pegs[sourcePegIdx];
+    const sourceDisc = sourcePeg.discs[sourcePeg.discs.length - 1];
+    const destinationPeg = pegs[destPegIdx];
+    const destDisc = destinationPeg.discs[destinationPeg.discs.length - 1];
+
+    if (!sourceDisc) {
+      return {
+        error: "\nNothing changed... Did you pick a peg with a disc?\n"
+      }
+    }
+
+    if (sourcePegIdx === destPegIdx) {
+      return {
+        error: "\nNothing changed... You just moved the disc to the same peg...\n"
+      };
+    }
+    
+    if(sourcePeg.discs.length === 0) {
+      return {
+        error: "\nSorry. You can't move a disc that doesn't exist.\n"
+      }
+    }
+
+    if (sourceDisc?.value > destDisc?.value) {
+      return {
+        error: "\nSorry. You can't move a larger disc on top of a smaller disc.\n"
+      }
+    }
+
+    return {
+      message: `\nMoving disc from ${sourcePegIdx + 1} to ${destPegIdx + 1}\n`
+    }
+  }
+
   // move a disc from one peg to another
   const move = (sourcePeg, destinationPeg) => {
+    const checkMoveResults = checkMove(sourcePeg, destinationPeg);
+
+    if (checkMoveResults?.error) {
+      console.error(checkMoveResults.error);
+      get();
+      return;
+    }
+
+    console.log(checkMoveResults.message);
     const { disc } = pegs[sourcePeg].removeDisc();
     pegs[destinationPeg].addDisc(disc.value);
+    
     get();
     checkWinningState();
   }
@@ -147,8 +192,7 @@ const board = (pegCount, discCount) => {
       
       if (i === 0) {
         for (let j = discCount; j !== 0; j--) {
-          // build winning condition dynamically
-          winningCondition.push({ value: j });
+          winningCondition.push({ value: j }); // build winning condition dynamically
           
           pegs[i].addDisc(j);
         }
@@ -168,7 +212,17 @@ const board = (pegCount, discCount) => {
 const game = () => {
   let newBoard;
   const isRunning = true;
-  // var for moveCount on each move
+  let moveCount = 0;
+
+  const getMoveCount = () => {
+    return moveCount;
+  }
+
+  const move = (sourcePegIdx, destinationPegIdx) => {
+    moveCount++;
+    newBoard.move(sourcePegIdx, destinationPegIdx);
+    console.log('Number of moves:', moveCount);
+  }
   // var for game timer
   // var for win count
   // potentially get and set for peg and disc count?
@@ -177,16 +231,11 @@ const game = () => {
     console.log('Starting a new game.')
     newBoard = board(pegs, discs);
     newBoard.start();
-    newBoard.move(0,1);
-    newBoard.move(0,1);
-    newBoard.move(0,1);
-    newBoard.move(0,1);
-    newBoard.move(0,1);
   }
 
   return {
-    // get: newBoard.get(),
-    // move: newBoard.move(),
+    getMoveCount,
+    move,
     start
   };
 }
@@ -194,7 +243,9 @@ const game = () => {
 const game1 = game();
 
 game1.start(3, 5);
-
+game1.move(1,1);
+game1.move(0,0);
+game1.move(0,1);
 
 // Potential option for running in the Node REPL
 // import repl from 'node:repl';
