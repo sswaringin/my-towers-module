@@ -114,7 +114,6 @@ const board = (pegCount, discCount) => {
     
     // Check if the peg has the correct order or discs
     if (potentialPeg) {
-      console.log('we have a potential!')
       hasCorrectOrder = potentialPeg.checkDiscOrder(winningCondition);
     }
     
@@ -242,10 +241,44 @@ const game = () => {
 
 const game1 = game();
 
-game1.start(3, 5);
-game1.move(1,1);
-game1.move(0,0);
-game1.move(0,1);
+// Example win
+// game1.start(3, 5);
+// game1.move(1,1);
+// game1.move(0,0);
+// game1.move(0,1);
+// game1.move(0,1);
+// game1.move(0,2);
+// game1.move(1,2);
+// game1.move(0,1);
+// game1.move(2,0);
+// game1.move(2,1);
+// game1.move(0,1);
+// game1.move(0,2);
+// game1.move(1,2);
+// game1.move(1,0);
+// game1.move(2,0);
+// game1.move(1,2);
+// game1.move(0,1);
+// game1.move(0,2);
+// game1.move(1,2);
+// game1.move(0,1);
+// game1.move(2,1);
+// game1.move(2,0);
+// game1.move(1,2);
+// game1.move(0,1);
+// game1.move(2,1);
+// game1.move(2,0);
+// game1.move(1,2);
+// game1.move(1,0);
+// game1.move(2,0);
+// game1.move(2,1);
+// game1.move(0,1);
+// game1.move(0,2);
+// game1.move(1,2);
+// game1.move(0,1);
+// game1.move(2,0);
+// game1.move(2,1);
+// game1.move(0,1);
 
 // Potential option for running in the Node REPL
 // import repl from 'node:repl';
