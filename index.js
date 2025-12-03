@@ -70,55 +70,91 @@ const peg = () => {
   };
 };
 
-const board = () => {
+const board = (pegCount, discCount) => {
+  const winningState = false;
   const pegs = [];
 
-  const addPeg = () => {
-    pegs.push(peg());
+
+  const getWinningState = () => {
+    return winningState;
   };
 
-  return {
-    pegs,
-    addPeg
-  };
-};
+  const checkWinningState = () => {
+    console.log('checking winning state')
+    // Is peg1 empty?
+    const isPeg1Empty = pegs[0].discs.length === 0;
 
-const game = () => {
-  let newBoard = board();
-  // var for moveCount on each move
-  // var for game timer
-  // potentially get and set for peg and disc count?
-  
-  const start = (pegs, discs) => {
-    console.log('Starting a new game.')
-    for (let i = 0; i < pegs; i++) {
-      newBoard.addPeg();
+    // Get a sub-array of pegs excluding peg1.
+    const otherPegs = pegs.slice(1);
 
-      if (i === 0) {
-        for (let j = discs; j !== 0; j--) {
-          newBoard.pegs[i].addDisc(j);
-        }
-      }
+    // Find if a peg has all of the discs.
+    const filteredPegs = otherPegs.filter(peg => peg.discs.length === discCount);
+    if (filteredPegs.length > 0 && isPeg1Empty) {
+      console.log('You might have won.');
+    } else {
+      console.log('You have not yet won.');
     }
   }
-  
+
+  // Display the current state of the board.
   const get = () => {
-    console.log('Getting the current state of the board.')
-    for (const peg in newBoard.pegs) {
-      const { discs } = newBoard.pegs[peg].getDiscs();
+    for (const peg in pegs) {
+      const { discs } = pegs[peg].getDiscs();
       console.log(discs);
     }
   };
 
+  // move a disc from one peg to another
   const move = (sourcePeg, destinationPeg) => {
-    console.log(`Moving a disc from ${sourcePeg} to ${destinationPeg}`)
-    const { disc } = newBoard.pegs[sourcePeg].removeDisc();
-    newBoard.pegs[destinationPeg].addDisc(disc.value);
+    const { disc } = pegs[sourcePeg].removeDisc();
+    pegs[destinationPeg].addDisc(disc.value);
+    get();
+    checkWinningState();
+  }
+
+  const start = () => {
+    for (let i = 0; i < pegCount; i++) {
+      pegs.push(peg());
+
+      if (i === 0) {
+        for (let j = discCount; j !== 0; j--) {
+          pegs[i].addDisc(j);
+        }
+      }
+    }
   }
 
   return {
+    getWinningState,
+    checkWinningState,
     get,
     move,
+    start
+  };
+};
+
+const game = () => {
+  let newBoard;
+  const isRunning = true;
+  // var for moveCount on each move
+  // var for game timer
+  // var for win count
+  // potentially get and set for peg and disc count?
+  
+  const start = (pegs, discs) => {
+    console.log('Starting a new game.')
+    newBoard = board(pegs, discs);
+    newBoard.start();
+    newBoard.move(0,1);
+    newBoard.move(0,1);
+    newBoard.move(0,1);
+    newBoard.move(0,1);
+    newBoard.move(0,1);
+  }
+
+  return {
+    // get: newBoard.get(),
+    // move: newBoard.move(),
     start
   };
 }
@@ -126,10 +162,7 @@ const game = () => {
 const game1 = game();
 
 game1.start(3, 5);
-game1.move(0,1);
-game1.get();
-game1.move(0,2);
-game1.get();
+
 
 // Potential option for running in the Node REPL
 // import repl from 'node:repl';
