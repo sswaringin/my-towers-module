@@ -25,20 +25,6 @@
  * need to be able to pass in a number of pegs and discs to start a board
  */
 
-// let hasActiveGame = false;
-
-// const start = () => {
-//   hasActiveGame = true;
-
-//   while(hasActiveGame) {
-//     console.log('The game is active.');
-//   }
-// }
-
-// const end = () => {
-//   console.log('Ending game.');
-//   hasActiveGame = false;
-// }
 const disc = (value) => {
   return { value };
 }
@@ -94,10 +80,6 @@ const board = (pegCount, discCount) => {
   const winningCondition = [];
   const pegs = [];
 
-  const getWinningState = () => {
-    return winningState;
-  };
-
   const getPotentialPeg = () => {
     // Get a sub-array of pegs excluding peg1.
     const otherPegs = pegs.slice(1);
@@ -119,19 +101,17 @@ const board = (pegCount, discCount) => {
     }
     
     if (potentialPeg && isPeg1Empty && hasCorrectOrder) {
-      console.log('YOU HAVE WON!');
       winningState = true;
-      return;
+      return winningState;
     }
-    console.log('You have not yet won.');
+    return false;
   }
 
   // Display the current state of the board.
   const get = () => {
-    for (const peg in pegs) {
-      const { discs } = pegs[peg].getDiscs();
-      console.log(discs);
-    }
+    return {
+      pegs: pegs.map(peg => peg.getDiscs())
+    };
   };
 
   const checkMove = (sourcePegIdx, destPegIdx) => {
@@ -142,30 +122,30 @@ const board = (pegCount, discCount) => {
 
     if (!sourceDisc) {
       return {
-        error: "\nNothing changed... Did you pick a peg with a disc?\n"
+        error: "Nothing changed... Did you pick a peg with a disc?"
       }
     }
 
     if (sourcePegIdx === destPegIdx) {
       return {
-        error: "\nNothing changed... You just moved the disc to the same peg...\n"
+        error: "Nothing changed... You just moved the disc to the same peg..."
       };
     }
     
     if(sourcePeg.discs.length === 0) {
       return {
-        error: "\nSorry. You can't move a disc that doesn't exist.\n"
+        error: "Sorry. You can't move a disc that doesn't exist."
       }
     }
 
     if (sourceDisc?.value > destDisc?.value) {
       return {
-        error: "\nSorry. You can't move a larger disc on top of a smaller disc.\n"
+        error: "Sorry. You can't move a larger disc on top of a smaller disc."
       }
     }
 
     return {
-      message: `\nMoving disc from ${sourcePegIdx + 1} to ${destPegIdx + 1}\n`
+      message: `Moving disc from ${sourcePegIdx + 1} to ${destPegIdx + 1}`
     }
   }
 
@@ -176,17 +156,23 @@ const board = (pegCount, discCount) => {
     const checkMoveResults = checkMove(sourcePeg, destinationPeg);
 
     if (checkMoveResults?.error) {
-      console.error(checkMoveResults.error);
-      get();
-      return;
+      return {
+        message: checkMoveResults.error,
+        board: get(),
+        moveCount,
+        winningState: checkWinningState()
+      }
     }
 
-    console.log(checkMoveResults.message);
     const { disc } = pegs[sourcePeg].removeDisc();
     pegs[destinationPeg].addDisc(disc.value);
     
-    get();
-    checkWinningState();
+    return {
+      message: checkMoveResults.message,
+      board: get(),
+      moveCount,
+      winningState: checkWinningState()
+    }
   }
 
   const start = () => {
@@ -201,11 +187,17 @@ const board = (pegCount, discCount) => {
         }
       }
     }
+
+    return {
+      message: "Starting a new game. 👾",
+      board: get(),
+      moveCount,
+      winningState: checkWinningState(),
+    }
   }
 
   return {
     getMoveCount: () => moveCount,
-    getWinningState,
     checkWinningState,
     getWinningState: () => winningState,
     get,
@@ -216,39 +208,67 @@ const board = (pegCount, discCount) => {
 
 const game = () => {
   let newBoard;
-  const isRunning = true;
+  let isRunning = true;
   let winCount = 0;
+  let gameStart;
+  let gameStop;
 
   const move = (sourcePegIdx, destinationPegIdx) => {
-    newBoard.move(sourcePegIdx, destinationPegIdx);
-    console.log('Number of moves:', newBoard.getMoveCount());
+    if (!isRunning) {
+      return { message: 'No more moves. The game is over!'}; // future prompt to start new game
+    }
+    
+    const results = newBoard.move(sourcePegIdx, destinationPegIdx);
 
-    if (newBoard.getWinningState()) {
+    if (results?.winningState) {
       winCount++;
+      isRunning = false;
+      gameStop = new Date();
+    }
+
+    return {
+      ...results
     }
   }
-  // var for game timer
-  // var for win count
   // potentially get and set for peg and disc count?
+  // If the game is over because of a winning condition or exiting, how does that work?
   
   const start = (pegs, discs) => {
-    console.log("\nStarting a new game. 👾\n")
+    gameStart = new Date();
     newBoard = board(pegs, discs);
-    newBoard.start();
+    const results = newBoard.start();
+
+    return {
+      ...results
+    }
+  }
+
+  const end = () => {
+    newBoard = null;
+    isRunning = false;
+    gameStop = new Date();
+
+    return {
+      message: "game over",
+      duration: {gameStop, gameStart},
+    }
   }
 
   return {
+    end,
     getWinCount: () => winCount,
+    isRunning: () => isRunning,
     move,
-    start
+    start,
   };
 }
+
+let totalWins = 0;
 
 // Example win
 const winningGame = () => {
   const game1 = game();
   game1.start(3, 5);
-  game1.move(1,1);
   game1.move(0,0);
   game1.move(0,1);
   game1.move(0,1);
@@ -284,9 +304,12 @@ const winningGame = () => {
   game1.move(2,0);
   game1.move(2,1);
   game1.move(0,1);
-  console.log('Number of wins:', game1.getWinCount());
 }
 winningGame();
+
+// game loop
+// If !game.isRunning(), return;
+// if game1.getWinCount() totalWins++;
 
 // Potential option for running in the Node REPL
 // import repl from 'node:repl';
@@ -304,3 +327,5 @@ winningGame();
 // }
 
 // repl.start({ prompt: 'Enter a number: ', eval: myEval });
+
+export { totalWins, game }
