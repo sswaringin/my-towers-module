@@ -123,7 +123,7 @@ const board = (pegCount, discCount) => {
 
     return {
       error: false,
-      message: `Moving disc from ${sourcePegIdx + 1} to ${destPegIdx + 1}`
+      message: `Moved disc from ${sourcePegIdx + 1} to ${destPegIdx + 1}`
     }
   }
 
