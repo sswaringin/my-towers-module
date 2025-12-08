@@ -136,6 +136,7 @@ const board = (pegCount, discCount) => {
     if (checkMoveResults?.error) {
       return {
         message: checkMoveResults.message,
+        error: true,
         board: get(),
         moveCount,
         winningState: checkWinningState()
@@ -147,6 +148,7 @@ const board = (pegCount, discCount) => {
     
     return {
       message: checkMoveResults.message,
+      error: false,
       board: get(),
       moveCount,
       winningState: checkWinningState()
@@ -243,6 +245,7 @@ const game = () => {
     end,
     isRunning: () => isRunning,
     message: "Start a new game. 👾",
+    error: false,
     move,
     start,
   };
