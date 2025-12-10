@@ -51,7 +51,15 @@ const board = (pegCount, discCount) => {
   let moveCount = 0;
   let winningState = false;
   const winningCondition = [];
-  const pegs = [];
+  
+  const makePegs = (pegCount) => {
+    const pegs = [];
+    for (let i = 0; i < pegCount; i++) {
+      pegs.push(peg());
+    }
+    return pegs;
+  };
+  const pegs = makePegs(pegCount);
 
   const getPotentialPeg = () => {
     // Get a sub-array of pegs excluding peg1.
@@ -156,16 +164,10 @@ const board = (pegCount, discCount) => {
   }
 
   const start = () => {
-    for (let i = 0; i < pegCount; i++) {
-      pegs.push(peg());
+    for (let j = discCount; j !== 0; j--) {
+      winningCondition.push({ value: j }); // build winning condition dynamically
       
-      if (i === 0) {
-        for (let j = discCount; j !== 0; j--) {
-          winningCondition.push({ value: j }); // build winning condition dynamically
-          
-          pegs[i].addDisc(j);
-        }
-      }
+      pegs[0].addDisc(j);
     }
 
     return {
@@ -249,47 +251,6 @@ const game = () => {
     move,
     start,
   };
-}
-
-// Example win
-const winningGame = () => {
-  const game1 = game();
-  game1.start(3, 5);
-  game1.move(0,0);
-  game1.move(0,1);
-  game1.move(0,1);
-  game1.move(0,2);
-  game1.move(1,2);
-  game1.move(0,1);
-  game1.move(2,0);
-  game1.move(2,1);
-  game1.move(0,1);
-  game1.move(0,2);
-  game1.move(1,2);
-  game1.move(1,0);
-  game1.move(2,0);
-  game1.move(1,2);
-  game1.move(0,1);
-  game1.move(0,2);
-  game1.move(1,2);
-  game1.move(0,1);
-  game1.move(2,1);
-  game1.move(2,0);
-  game1.move(1,2);
-  game1.move(0,1);
-  game1.move(2,1);
-  game1.move(2,0);
-  game1.move(1,2);
-  game1.move(1,0);
-  game1.move(2,0);
-  game1.move(2,1);
-  game1.move(0,1);
-  game1.move(0,2);
-  game1.move(1,2);
-  game1.move(0,1);
-  game1.move(2,0);
-  game1.move(2,1);
-  game1.move(0,1);
 }
 
 export { game }
