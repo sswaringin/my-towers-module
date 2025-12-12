@@ -196,60 +196,62 @@ const game = () => {
   let isRunning = false;
   let gameStart;
   let gameStop;
+  let message = "Start a new game. 👾";
+  let error = false;
+
+  // consistently return without referencing stale state
+  const returnState = () => {
+    return {
+      board: () => newBoard.get(),
+      moveCount: newBoard.getMoveCount(),
+      winningState: newBoard.getWinningState(),
+      message,
+      isRunning,
+      error,
+    }
+  }
 
   const move = (sourcePegIdx, destinationPegIdx) => {
     if (!isRunning) {
-      return {
-        board: newBoard.get(),
-        message: "You can't move unless the game is started.",
-        moveCount: newBoard.getMoveCount(),
-        winningState: false,
-        error: true
-      };
+      error = true;
+      message = "You can't move unless the game is started.";
+      return returnState()
     }
     
     const results = newBoard.move(sourcePegIdx, destinationPegIdx);
+    message = results.message;
+    error = results.error;
 
     if (results?.winningState) {
       isRunning = false;
       gameStop = new Date();
-      results.message = "Congratulations! You won!";
+      message = "Congratulations! You won!";
     }
 
-    return {
-      ...results
-    }
+    return returnState();
   }
-  // potentially get and set for peg and disc count?
   
   const start = () => {
     gameStart = new Date();
     isRunning = true;
     newBoard = board(pegs, discs);
     const results = newBoard.start();
+    message = results.message;
 
-    return {
-      ...results
-    }
+    return returnState();
   }
 
   const end = () => {
     newBoard = board(pegs, discs);
     isRunning = false;
     gameStop = new Date();
+    message = "Game over";
 
-    return {
-      message: "game over",
-      duration: {gameStop, gameStart},
-    }
+    return returnState();
   }
   return {
-    board: newBoard.get(),
+    getState: returnState,
     end,
-    isRunning: () => isRunning,
-    message: "Start a new game. 👾",
-    error: false,
-    winningState: false,
     move,
     start,
   };
