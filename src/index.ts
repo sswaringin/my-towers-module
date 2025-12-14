@@ -12,7 +12,7 @@ interface Peg {
 
 interface BoardState {
   message: string;
-  board: { pegs: { discs: number[] }[] };
+  board: () => { pegs: { discs: number[] }[] };
   moveCount: number;
   winningState: boolean;
   error: boolean;
@@ -28,7 +28,14 @@ interface Board {
   get: () => { pegs: { discs: number[] }[] };
 }
 
-interface Game {}
+type GameState = BoardState & { isRunning: boolean };
+
+interface Game {
+  getState: () => GameState;
+  start: () => GameState;
+  end: () => GameState;
+  move: (sourcePegIdx: number, destinationPegIdx: number) => GameState;
+}
 
 const disc = (value: number): Disc => {
   return { value };
@@ -185,19 +192,22 @@ const board = (pegCount: number, discCount: number): Board => {
       return {
         message: checkMoveResults.message,
         error: true,
-        board: get(),
+        board: () => get(),
         moveCount,
         winningState: checkWinningState(),
       };
     }
 
     const { disc } = pegs[sourcePeg].removeDisc();
-    pegs[destinationPeg].addDisc(disc.value);
+
+    if (disc?.value) {
+      pegs[destinationPeg].addDisc(disc.value);
+    }
 
     return {
       message: checkMoveResults.message,
       error: false,
-      board: get(),
+      board: () => get(),
       moveCount,
       winningState: checkWinningState(),
     };
@@ -213,7 +223,7 @@ const board = (pegCount: number, discCount: number): Board => {
     return {
       message: "Make a move.",
       error: false,
-      board: get(),
+      board: () => get(),
       moveCount,
       winningState: checkWinningState(),
     };
@@ -231,17 +241,17 @@ const board = (pegCount: number, discCount: number): Board => {
 };
 
 const game = (): Game => {
-  let pegs = 3;
-  let discs = 5;
-  let newBoard = board(pegs, discs);
-  let isRunning = false;
-  let gameStart;
-  let gameStop;
-  let message = "Start a new game. 👾";
-  let error = false;
+  const pegsCount: number = 3;
+  const discCount: number = 5;
+  let newBoard: Board = board(pegsCount, discCount);
+  let isRunning: boolean = false;
+  let gameStart: Date;
+  let gameStop: Date;
+  let message: string = "Start a new game. 👾";
+  let error: boolean = false;
 
   // consistently return without referencing stale state
-  const returnState = () => {
+  const returnState = (): GameState => {
     return {
       board: () => newBoard.get(),
       moveCount: newBoard.getMoveCount(),
@@ -252,7 +262,7 @@ const game = (): Game => {
     };
   };
 
-  const move = (sourcePegIdx, destinationPegIdx) => {
+  const move = (sourcePegIdx: number, destinationPegIdx: number): GameState => {
     if (!isRunning) {
       error = true;
       message = "You can't move unless the game is started.";
@@ -272,18 +282,18 @@ const game = (): Game => {
     return returnState();
   };
 
-  const start = () => {
+  const start = (): GameState => {
     gameStart = new Date();
     isRunning = true;
-    newBoard = board(pegs, discs);
+    newBoard = board(pegsCount, discCount);
     const results = newBoard.start();
     message = results.message;
 
     return returnState();
   };
 
-  const end = () => {
-    newBoard = board(pegs, discs);
+  const end = (): GameState => {
+    newBoard = board(pegsCount, discCount);
     isRunning = false;
     gameStop = new Date();
     message = "Game over";
