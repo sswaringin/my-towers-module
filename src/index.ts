@@ -293,7 +293,7 @@ const game = (): Game => {
   };
 
   const end = (): GameState => {
-    newBoard = board(pegsCount, discCount);
+    // newBoard = board(pegsCount, discCount);
     isRunning = false;
     gameStop = new Date();
     message = "Game over";
