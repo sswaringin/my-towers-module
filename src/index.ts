@@ -30,8 +30,8 @@ interface Board {
 
 type GameState = BoardState & {
   isRunning: boolean;
-  gameStart: string;
-  gameStop: string;
+  gameStart?: string;
+  gameStop?: string;
 };
 
 interface Game {
