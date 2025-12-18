@@ -28,7 +28,11 @@ interface Board {
   get: () => { pegs: { discs: number[] }[] };
 }
 
-type GameState = BoardState & { isRunning: boolean };
+type GameState = BoardState & {
+  isRunning: boolean;
+  gameStart: Date;
+  gameStop: Date;
+};
 
 interface Game {
   getState: () => GameState;
@@ -259,6 +263,8 @@ const game = (): Game => {
       message,
       isRunning,
       error,
+      gameStart,
+      gameStop,
     };
   };
 
