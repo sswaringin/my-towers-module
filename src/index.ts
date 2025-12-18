@@ -30,8 +30,8 @@ interface Board {
 
 type GameState = BoardState & {
   isRunning: boolean;
-  gameStart: Date;
-  gameStop: Date;
+  gameStart: string;
+  gameStop: string;
 };
 
 interface Game {
@@ -249,8 +249,8 @@ const game = (): Game => {
   const discCount: number = 5;
   let newBoard: Board = board(pegsCount, discCount);
   let isRunning: boolean = false;
-  let gameStart: Date;
-  let gameStop: Date;
+  let gameStart: string;
+  let gameStop: string;
   let message: string = "Start a new game. 👾";
   let error: boolean = false;
 
@@ -281,7 +281,7 @@ const game = (): Game => {
 
     if (results?.winningState) {
       isRunning = false;
-      gameStop = new Date();
+      gameStop = new Date().toISOString();
       message = "Congratulations! You won!";
     }
 
@@ -289,7 +289,7 @@ const game = (): Game => {
   };
 
   const start = (): GameState => {
-    gameStart = new Date();
+    gameStart = new Date().toISOString();
     isRunning = true;
     newBoard = board(pegsCount, discCount);
     const results = newBoard.start();
@@ -301,7 +301,7 @@ const game = (): Game => {
   const end = (): GameState => {
     // newBoard = board(pegsCount, discCount);
     isRunning = false;
-    gameStop = new Date();
+    gameStop = new Date().toISOString();
     message = "Game over";
 
     return returnState();
@@ -315,3 +315,4 @@ const game = (): Game => {
 };
 
 export { game };
+export type { Disc, Peg, BoardState, Board, GameState, Game };
